@@ -1,7 +1,6 @@
 #include <iostream>
 #include <vector>
 #include <cmath>
-#include <cctype>
 #include <random>
 
 using namespace std;
@@ -9,6 +8,7 @@ using namespace std;
 struct Character {
     string name;
     int stepHeight;
+    bool fallen; // Новое для отслеживания, упал ли персонаж
 };
 
 int howMuchCanReach(int diff, const vector<Character> &brotherhood) {
@@ -51,6 +51,15 @@ int main() {
 
     for (int i = 0; i < N && brotherhood.size() > 1; i = i + 1) {
         int diff = abs(obstacles[i] - obstacles[i + 1]);
+
+        // Если Gandalf упал, переносим его на случайную платформу
+        if (brotherhood.back().name == "Gandalf" && brotherhood.back().fallen) {
+            uniform_int_distribution<unsigned int> distribute_platform(0, N);
+            int random_platform = distribute_platform(generator);
+            obstacles[i] = obstacles[random_platform];
+            brotherhood.back().fallen = false; // Помечаем Gandalf как неупавшего
+        }
+
         while (brotherhood.size() > 1 && howMuchCanReach(diff, brotherhood) < 2) {
             diff--;
             brotherhood.pop_back();
@@ -59,7 +68,7 @@ int main() {
     if (brotherhood.size() == 1) {
         cout << "Sauron wins";
     } else {
-        cout << "Gandalf wins" << endl;
+        cout << "Gandalf wins, Frodo has arrived" << endl;
         for (auto &i: brotherhood) {
             cout << i.name << endl;
         }
